@@ -1,4 +1,4 @@
-name: Build APK with Buildozer
+name: Build Kivy Android APK
 
 on:
   push:
@@ -19,45 +19,45 @@ jobs:
       with:
         python-version: "3.10"
 
-    - name: Install Dependencies
+    - name: Install dependencies
       run: |
         sudo apt update
-        sudo apt install -y python3 python3-pip openjdk-17-jdk unzip wget
-
-    - name: Install Buildozer & Cython
-      run: |
+        sudo apt install -y python3-pip git zip unzip openjdk-17-jdk
         pip install --upgrade pip
-        pip install buildozer cython virtualenv
+        pip install cython buildozer
 
     - name: Install Android SDK
       run: |
         mkdir -p ~/.buildozer/android/platform/android-sdk/cmdline-tools
         cd ~/.buildozer/android/platform/android-sdk
-        wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
-        unzip commandlinetools-linux-9477386_latest.zip -d cmdline-tools
+        wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O commandlinetools.zip
+        unzip commandlinetools.zip -d cmdline-tools
         mv cmdline-tools/cmdline-tools cmdline-tools/latest
-        rm -rf commandlinetools-linux-9477386_latest.zip
+        rm -f commandlinetools.zip
 
     - name: Set up Environment Variables
       run: |
         echo "ANDROID_HOME=$HOME/.buildozer/android/platform/android-sdk" >> $GITHUB_ENV
         echo "ANDROID_SDK_ROOT=$HOME/.buildozer/android/platform/android-sdk" >> $GITHUB_ENV
         echo "PATH=$HOME/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin:$HOME/.buildozer/android/platform/android-sdk/platform-tools:$PATH" >> $GITHUB_ENV
-
-    - name: Accept Android Licenses
-      run: |
-        yes | sdkmanager --licenses || true
+        echo "y" | $HOME/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses || true
 
     - name: Install Android Build Tools
       run: |
-        sdkmanager --install "platform-tools" "platforms;android-33" "build-tools;33.0.1"
+        $HOME/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin/sdkmanager --install "platform-tools" "platforms;android-33" "build-tools;33.0.1"
+
+    - name: Initialize Buildozer
+      run: |
+        if [ ! -f "buildozer.spec" ]; then
+          buildozer init
+        fi
 
     - name: Build APK
       run: |
         buildozer android debug
 
     - name: Upload APK
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v3
       with:
-        name: Built APK
+        name: Kivy-App-APK
         path: bin/*.apk
