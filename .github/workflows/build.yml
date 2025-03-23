@@ -13,10 +13,10 @@ jobs:
 
     steps:
     - name: Checkout Repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4  # Updated to latest version
 
     - name: Set up Python 3.12
-      uses: actions/setup-python@v3
+      uses: actions/setup-python@v4  # Updated version
       with:
         python-version: "3.12"
 
@@ -56,7 +56,7 @@ jobs:
         buildozer -v android debug
 
     - name: Upload APK
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4  # Updated version
       with:
         name: Kivy-APK
         path: bin/*.apk
