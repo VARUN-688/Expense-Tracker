@@ -45,7 +45,8 @@ p4a.branch = master
 android.minapi = 21
 
 # (str) Architecture to support (arm64-v8a = 64-bit)
-android.arch = arm64-v8a
+android.archs = arm64-v8a, armeabi-v7a
+
 
 # (bool) Enable keyboard mode
 input.enable = True
