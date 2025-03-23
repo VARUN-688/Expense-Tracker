@@ -1,48 +1,36 @@
-name: Build Kivy APK
+name: Build APK
 
-on:
-  push:
-    branches:
-      - master  # Runs the workflow when code is pushed to master
+on: [push, pull_request]
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v3
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: "3.10"
+      - name: Set up dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y python3-pip openjdk-17-jdk unzip
+          pip3 install --user --upgrade Cython virtualenv
+          pip3 install --user buildozer
+      
+      - name: Install Android SDK & NDK
+        run: |
+          sudo apt install -y android-sdk android-sdk-platform-tools android-sdk-platform-33
+          export ANDROID_HOME=$HOME/android-sdk
+          export PATH=$ANDROID_HOME/tools:$ANDROID_HOME/tools/bin:$ANDROID_HOME/platform-tools:$PATH
+          sdkmanager --install "build-tools;33.0.0" "platform-tools" "platforms;android-33" "ndk;25.1.8937393"
+          sdkmanager --licenses || true
 
-    - name: Install system dependencies
-      run: |
-        sudo apt update
-        sudo apt install -y zip unzip openjdk-17-jdk
+      - name: Build APK
+        run: |
+          buildozer android debug
 
-    - name: Install pip dependencies
-      run: |
-        pip install --upgrade pip
-        pip install buildozer cython virtualenv
-
-    - name: Install Android NDK & SDK
-      run: |
-        sudo apt install -y wget
-        wget https://dl.google.com/android/repository/android-ndk-r27c-linux.zip
-        unzip android-ndk-r27c-linux.zip
-        mv android-ndk-r27c $HOME/android-ndk
-        echo "ANDROIDNDK=$HOME/android-ndk" >> $GITHUB_ENV
-        echo "ANDROID_NDK_HOME=$HOME/android-ndk" >> $GITHUB_ENV
-
-    - name: Build APK
-      run: |
-        buildozer android debug
-
-    - name: Upload APK
-      uses: actions/upload-artifact@v4
-      with:
-        name: Kivy-App-APK
-        path: bin/*.apk
+      - name: Upload APK
+        uses: actions/upload-artifact@v3
+        with:
+          name: MobileExpenseTracker
+          path: bin/*.apk
