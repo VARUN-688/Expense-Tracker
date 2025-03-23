@@ -28,7 +28,7 @@ jobs:
             libgl1-mesa-dev libgles2-mesa-dev \
             build-essential autoconf libtool pkg-config \
             python3-setuptools python3-wheel \
-            cython ffmpeg
+            ffmpeg
 
       - name: Install Buildozer and Dependencies
         run: |
