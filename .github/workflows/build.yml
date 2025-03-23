@@ -13,26 +13,36 @@ jobs:
 
     steps:
     - name: Checkout Repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4  # Updated to latest version
 
-    - name: Set up Python
-      uses: actions/setup-python@v3
+    - name: Set up Python 3.12
+      uses: actions/setup-python@v4  # Updated version
       with:
-        python-version: "3.8"
+        python-version: "3.12"
 
-    - name: Install Dependencies
+    - name: Install System Dependencies
       run: |
         sudo apt update
-        sudo apt install -y git zip openjdk-8-jdk python3-pip autoconf libtool pkg-config zlib1g-dev \
-        libncurses5-dev libncursesw5-dev libtinfo5 cmake libffi-dev
-        pip3 install --user --upgrade cython virtualenv
-        sudo apt-get install -y cython
+        sudo apt install -y git zip openjdk-8-jdk python3.12 python3.12-dev python3.12-venv python3-pip autoconf libtool pkg-config zlib1g-dev \
+        libncurses5-dev libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev libjpeg-dev \
+        libsqlite3-dev libbz2-dev libreadline-dev liblzma-dev libgirepository1.0-dev \
+        libcairo2-dev libmtdev-dev cython ffmpeg libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev \
+        libsdl2-ttf-dev libportmidi-dev libswscale-dev libavformat-dev libavcodec-dev \
+        libgstreamer1.0-dev gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad \
+        gstreamer1.0-libav gstreamer1.0-doc gstreamer1.0-tools gstreamer1.0-x gstreamer1.0-alsa \
+        gstreamer1.0-gl gstreamer1.0-gtk3 gstreamer1.0-qt5 gstreamer1.0-pulseaudio
+        
+    - name: Install Python Dependencies
+      run: |
+        python3.12 -m pip install --upgrade pip
+        python3.12 -m pip install cython virtualenv
+        python3.12 -m pip install kivy kivy-garden pandas numpy matplotlib
 
     - name: Install Buildozer
       run: |
         git clone https://github.com/kivy/buildozer.git
         cd buildozer
-        sudo python3 setup.py install
+        sudo python3.12 setup.py install
         cd ..
 
     - name: Initialize Buildozer (if needed)
@@ -46,7 +56,7 @@ jobs:
         buildozer -v android debug
 
     - name: Upload APK
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4  # Updated version
       with:
         name: Kivy-APK
         path: bin/*.apk
