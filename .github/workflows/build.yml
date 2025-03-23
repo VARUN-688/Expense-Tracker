@@ -9,52 +9,43 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+
+      - name: Checkout Repository
+        uses: actions/checkout@v3
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v3
         with:
           python-version: '3.10'
 
-      - name: Install system dependencies
+      - name: Install Dependencies
         run: |
           sudo apt update
-          sudo apt install -y \
-            git zip unzip openjdk-17-jdk \
-            python3 python3-pip python3-venv \
-            libgl1-mesa-dev libgles2-mesa-dev \
-            build-essential autoconf libtool pkg-config \
-            python3-setuptools python3-wheel \
-            ffmpeg \
-            aidl  # ✅ Fix: Ensure aidl is installed
-
-      - name: Install Buildozer and Dependencies
-        run: |
+          sudo apt install -y python3-pip git unzip openjdk-17-jdk libstdc++6
           pip install --upgrade pip
-          pip install buildozer cython virtualenv 
+          pip install buildozer Cython
 
-      - name: Cache Buildozer .buildozer directory
-        uses: actions/cache@v3
-        with:
-          path: .buildozer
-          key: ${{ runner.os }}-buildozer-${{ hashFiles('**/buildozer.spec') }}
-          restore-keys: |
-            ${{ runner.os }}-buildozer-
+      - name: Install Android SDK & AIDL
+        run: |
+          export ANDROID_HOME=$HOME/.buildozer/android/platform/android-sdk
+          export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$PATH
+          mkdir -p $ANDROID_HOME/cmdline-tools
+          cd $ANDROID_HOME/cmdline-tools
+          curl -o sdk.zip https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
+          unzip sdk.zip -d $ANDROID_HOME/cmdline-tools/
+          mv $ANDROID_HOME/cmdline-tools/cmdline-tools $ANDROID_HOME/cmdline-tools/latest
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.2"
 
       - name: Initialize Buildozer
-        run: |
-          if [ ! -f buildozer.spec ]; then
-            buildozer init
-          fi
+        run: buildozer init
 
       - name: Run Buildozer to Build APK
         run: buildozer android debug
 
-      - name: Upload APK as Artifact
-        uses: actions/upload-artifact@v4
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v3
         with:
-          name: MyApp-APK
+          name: YourAppName-APK
           path: bin/*.apk
