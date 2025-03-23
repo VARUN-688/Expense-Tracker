@@ -45,7 +45,7 @@ jobs:
         run: buildozer android debug
 
       - name: Upload APK Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4.3.1  # ✅ Fixed: Using latest version
         with:
           name: YourAppName-APK
           path: bin/*.apk
